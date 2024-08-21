@@ -14,7 +14,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
-@Route(value = "")
+@Route(value = "", layout = MainLayout.class)
 @PageTitle("Lobby")
 public class LobbyView extends VerticalLayout {
 
