@@ -8,6 +8,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import reactor.core.Disposable;
@@ -15,14 +16,20 @@ import reactor.core.Disposable;
 import java.util.List;
 import java.util.ArrayList;
 
-@Route(value = "channel")
+@Route(value = "channel", layout = MainLayout.class)
 public class ChannelView extends VerticalLayout
-        implements HasUrlParameter<String> {
+        implements HasUrlParameter<String>, HasDynamicTitle {
 
+    private String channelName;
     private final ChatService chatService;
     private final MessageList messageList;
     private String channelId;
     private final List<Message> receivedMessages = new ArrayList<Message>();
+
+    @Override
+    public String getPageTitle() {
+        return channelName;
+    }
 
     public ChannelView(ChatService chatService) {
         this.chatService = chatService;
@@ -40,11 +47,11 @@ public class ChannelView extends VerticalLayout
 
     @Override
     public void setParameter(BeforeEvent event, String channelId) {
-        if (chatService.channel(channelId).isEmpty()) {
-            event.forwardTo(LobbyView.class);
-        } else {
-            this.channelId = channelId;
-        }
+        chatService.channel(channelId).ifPresentOrElse(
+                channel -> this.channelName = channel.name(),
+                () -> event.forwardTo(LobbyView.class)
+        );
+        this.channelId = channelId;
     }
 
     @Override
