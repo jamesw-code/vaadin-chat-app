@@ -41,9 +41,10 @@ public class ChannelView extends VerticalLayout
     @Override
     public void setParameter(BeforeEvent event, String channelId) {
         if (chatService.channel(channelId).isEmpty()) {
-            throw new IllegalArgumentException("Invalid channel ID");
+            event.forwardTo(LobbyView.class);
+        } else {
+            this.channelId = channelId;
         }
-        this.channelId = channelId;
     }
 
     @Override
