@@ -1,4 +1,4 @@
-package com.example.application.views.channel;
+package com.example.application.views;
 
 import com.example.application.chat.ChatService;
 import com.example.application.chat.Message;
@@ -12,13 +12,14 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import reactor.core.Disposable;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
 
 @Route(value = "channel", layout = MainLayout.class)
+@PermitAll
 public class ChannelView extends VerticalLayout
         implements HasUrlParameter<String>, HasDynamicTitle {
 
@@ -103,6 +104,5 @@ public class ChannelView extends VerticalLayout
         ));
         return subscription;
     }
-
 
 }

@@ -4,9 +4,12 @@ import com.example.application.chat.spi.ChannelRepository;
 import com.example.application.chat.spi.MessageRepository;
 import com.example.application.chat.spi.NewChannel;
 import com.example.application.chat.spi.NewMessage;
+import com.example.application.security.Roles;
 import jakarta.annotation.Nullable;
+import jakarta.annotation.security.RolesAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RolesAllowed(Roles.USER)
 public class ChatService {
 
     private static final Logger log = LoggerFactory.getLogger(ChatService.class);
@@ -66,6 +70,7 @@ public class ChatService {
         return channelRepository.findAll();
     }
 
+    @RolesAllowed(Roles.ADMIN)
     public Channel createChannel(String name) {
         return channelRepository.save(new NewChannel(name));
     }
@@ -89,7 +94,7 @@ public class ChatService {
         if (!channelRepository.exists(channelId)) {
             throw new InvalidChannelException();
         }
-        var author = "John Doe";
+        var author = SecurityContextHolder.getContext().getAuthentication().getName();
         var msg = messageRepository.save(new NewMessage(channelId, clock.instant(), author, message));
         var result = sink.tryEmitNext(msg);
         if (result.isFailure()) {
