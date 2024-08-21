@@ -2,6 +2,7 @@ package com.example.application.views.channel;
 
 import com.example.application.chat.ChatService;
 import com.example.application.chat.Message;
+import com.example.application.util.LimitedSortedAppendOnlyList;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageList;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import reactor.core.Disposable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -24,7 +26,8 @@ public class ChannelView extends VerticalLayout
     private final ChatService chatService;
     private final MessageList messageList;
     private String channelId;
-    private final List<Message> receivedMessages = new ArrayList<Message>();
+    private static final int HISTORY_SIZE = 20;
+    private final LimitedSortedAppendOnlyList<Message> receivedMessages;
 
     @Override
     public String getPageTitle() {
@@ -33,6 +36,10 @@ public class ChannelView extends VerticalLayout
 
     public ChannelView(ChatService chatService) {
         this.chatService = chatService;
+        receivedMessages = new LimitedSortedAppendOnlyList<>(
+                HISTORY_SIZE,
+                Comparator.comparing(Message::sequenceNumber)
+        );
         setSizeFull();
 
         messageList = new MessageList();
@@ -87,6 +94,13 @@ public class ChannelView extends VerticalLayout
         var subscription = chatService
                 .liveMessages(channelId)
                 .subscribe(this::receiveMessages);
+        var lastSeenMessageId = receivedMessages.getLast()
+                .map(Message::messageId).orElse(null);
+        receiveMessages(chatService.messageHistory(
+                channelId,
+                HISTORY_SIZE,
+                lastSeenMessageId
+        ));
         return subscription;
     }
 
