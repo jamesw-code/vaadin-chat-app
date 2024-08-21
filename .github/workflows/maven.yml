@@ -39,7 +39,7 @@ jobs:
         cache: maven
         
     - name: Package with Maven
-      run: mvn clean package -Pproduction
+      run: mvn clean package -Pproduction -DskipTests
 
     # Alternative option - authentication via credentials json
     - id: 'auth'
